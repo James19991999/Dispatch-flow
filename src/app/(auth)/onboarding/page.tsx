@@ -84,10 +84,10 @@ export default function OnboardingPage() {
 
   return (
     <div className="rounded-card border border-white/10 bg-[#111a2e] p-6 shadow-2xl">
-      <div className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-white/40">
-        <span className={step === 1 ? "text-brand" : ""}>1. Account</span>
+      <div className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+        <span className={step === 1 ? "text-[#93b4f7]" : ""}>1. Account</span>
         <span className="h-px flex-1 bg-white/10" />
-        <span className={step === 2 ? "text-brand" : ""}>2. Organization</span>
+        <span className={step === 2 ? "text-[#93b4f7]" : ""}>2. Organization</span>
       </div>
 
       {step === 1 ? (
@@ -97,7 +97,7 @@ export default function OnboardingPage() {
           </h1>
           {!hasAccount && (
             <div>
-              <Label className="text-white/60">Your Name</Label>
+              <Label className="text-slate-400">Your Name</Label>
               <div className="relative">
                 <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
                 <Input
@@ -111,7 +111,7 @@ export default function OnboardingPage() {
             </div>
           )}
           <div>
-            <Label className="text-white/60">Work Email</Label>
+            <Label className="text-slate-400">Work Email</Label>
             <div className="relative">
               <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
               <Input
@@ -125,7 +125,7 @@ export default function OnboardingPage() {
             </div>
           </div>
           <div>
-            <Label className="text-white/60">Password</Label>
+            <Label className="text-slate-400">Password</Label>
             <div className="relative">
               <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
               <Input
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
           <button
             type="button"
             onClick={() => setHasAccount((v) => !v)}
-            className="w-full text-center text-sm font-semibold text-white/40 hover:text-white/70"
+            className="w-full text-center text-sm font-semibold text-slate-400 hover:text-slate-300"
           >
             {hasAccount ? "New here? Create an account instead" : "Already have an account? Sign in"}
           </button>
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
         <form onSubmit={handleOrgStep} className="space-y-4">
           <h1 className="text-xl font-bold text-white">Set up your fleet</h1>
           <div>
-            <Label className="text-white/60">Organization Name</Label>
+            <Label className="text-slate-400">Organization Name</Label>
             <div className="relative">
               <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
               <Input
@@ -168,7 +168,7 @@ export default function OnboardingPage() {
             </div>
           </div>
           <div>
-            <Label className="text-white/60">Primary Depot / Hub Name</Label>
+            <Label className="text-slate-400">Primary Depot / Hub Name</Label>
             <Input
               required
               value={depotName}
@@ -178,7 +178,7 @@ export default function OnboardingPage() {
             />
           </div>
           <div>
-            <Label className="text-white/60">Depot Address</Label>
+            <Label className="text-slate-400">Depot Address</Label>
             <div className="relative">
               <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
               <Input
@@ -191,7 +191,7 @@ export default function OnboardingPage() {
             </div>
           </div>
           <div>
-            <Label className="text-white/60">Timezone</Label>
+            <Label className="text-slate-400">Timezone</Label>
             <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
@@ -211,8 +211,8 @@ export default function OnboardingPage() {
         </form>
       )}
 
-      <p className="mt-6 text-center text-sm text-white/40">
-        <Link href="/login" className="font-semibold text-brand hover:text-brand-light">
+      <p className="mt-6 text-center text-sm text-slate-400">
+        <Link href="/login" className="font-semibold text-[#93b4f7] hover:text-white">
           Back to sign in
         </Link>
       </p>

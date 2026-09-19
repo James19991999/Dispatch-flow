@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ThemeProvider, themeInitScript } from "@/components/providers/ThemeProvider";
 
 // Plus Jakarta Sans is loaded via next/font/google in production (Vercel can
 // reach fonts.googleapis.com). This build environment's network sandbox
@@ -31,8 +32,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Sets data-theme before hydration so switching themes never flashes the wrong one. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="antialiased">
-        <ToastProvider>{children}</ToastProvider>
+        <ThemeProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

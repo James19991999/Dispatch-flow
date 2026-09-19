@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
 import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_MS } from "@/lib/auth/session";
+import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 // Exchanges a fresh Firebase ID token (which already carries the orgId
 // custom claim once the caller has an organization) for an httpOnly session
 // cookie. This is the standard Firebase SSR pattern: the ID token never
 // touches a cookie directly, only this derived session cookie does.
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(`session:${clientIp(req)}`, 20, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many attempts — try again shortly" }, { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds) } });
+  }
+
   const { idToken } = await req.json().catch(() => ({ idToken: null }));
   if (!idToken || typeof idToken !== "string") {
     return NextResponse.json({ error: "Missing idToken" }, { status: 400 });

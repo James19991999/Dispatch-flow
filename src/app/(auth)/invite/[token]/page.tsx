@@ -74,7 +74,7 @@ export default function InviteAcceptPage() {
       <div className="rounded-card border border-white/10 bg-[#111a2e] p-6 text-center shadow-2xl">
         <XCircle className="mx-auto mb-3 text-critical" size={32} />
         <h1 className="text-lg font-bold text-white">Invite unavailable</h1>
-        <p className="mt-1 text-sm text-white/50">{previewError}</p>
+        <p className="mt-1 text-sm text-slate-400">{previewError}</p>
       </div>
     );
   }
@@ -90,14 +90,14 @@ export default function InviteAcceptPage() {
   return (
     <div className="rounded-card border border-white/10 bg-[#111a2e] p-6 shadow-2xl">
       <h1 className="text-xl font-bold text-white">You&apos;re invited to {preview.orgName}</h1>
-      <p className="mt-1 text-sm text-white/50">
-        Joining as <span className="font-semibold text-brand">{ROLE_LABELS[preview.role]}</span> · {preview.email}
+      <p className="mt-1 text-sm text-slate-400">
+        Joining as <span className="font-semibold text-[#93b4f7]">{ROLE_LABELS[preview.role]}</span> · {preview.email}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         {!hasAccount && (
           <div>
-            <Label className="text-white/60">Your Name</Label>
+            <Label className="text-slate-400">Your Name</Label>
             <div className="relative">
               <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
               <Input
@@ -111,18 +111,18 @@ export default function InviteAcceptPage() {
           </div>
         )}
         <div>
-          <Label className="text-white/60">Email</Label>
+          <Label className="text-slate-400">Email</Label>
           <div className="relative">
             <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
             <Input
               disabled
               value={preview.email}
-              className="border-white/10 bg-white/5 pl-10 text-white/60"
+              className="border-white/10 bg-white/5 pl-10 text-slate-400"
             />
           </div>
         </div>
         <div>
-          <Label className="text-white/60">Password</Label>
+          <Label className="text-slate-400">Password</Label>
           <div className="relative">
             <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
             <Input
@@ -143,7 +143,7 @@ export default function InviteAcceptPage() {
         <button
           type="button"
           onClick={() => setHasAccount((v) => !v)}
-          className="w-full text-center text-sm font-semibold text-white/40 hover:text-white/70"
+          className="w-full text-center text-sm font-semibold text-slate-400 hover:text-slate-300"
         >
           {hasAccount ? "New here? Create an account instead" : "Already have an account? Sign in"}
         </button>

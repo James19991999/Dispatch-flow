@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Users, Truck, Car, ScrollText, Building2, MapPin, Sparkles, HelpCircle } from "lucide-react";
+import { Users, Truck, Car, ScrollText, Building2, MapPin, Sparkles, HelpCircle, Sun, Moon, Monitor } from "lucide-react";
 import { TopBar } from "@/components/nav/TopBar";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select, FieldError } from "@/components/ui/Field";
 import { useOrg } from "@/components/providers/OrgProvider";
 import { useToast } from "@/components/ui/Toast";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { canManageTeam } from "@/lib/auth/roles";
 import { ROLE_LABELS } from "@/lib/auth/roles";
+import { cx } from "@/lib/utils";
 
 const TIMEZONES = ["Africa/Nairobi", "Africa/Lagos", "Africa/Johannesburg", "Africa/Cairo", "Europe/London", "America/New_York", "America/Los_Angeles", "Asia/Dubai"];
 
 export default function SettingsPage() {
   const { org, member } = useOrg();
   const { push } = useToast();
+  const { theme, setTheme } = useTheme();
   const canAdmin = canManageTeam(member.role);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
@@ -157,6 +160,41 @@ export default function SettingsPage() {
                   </Button>
                 )}
               </form>
+            </CardBody>
+          </Card>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-sm font-bold text-ink">Appearance</h2>
+          <Card>
+            <CardBody className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold text-ink">Theme</p>
+                <p className="text-xs text-ink-muted">Applies instantly, saved on this device.</p>
+              </div>
+              <div className="flex rounded-control border border-outline-variant p-0.5">
+                {(
+                  [
+                    { key: "light", icon: Sun, label: "Light" },
+                    { key: "dark", icon: Moon, label: "Dark" },
+                    { key: "system", icon: Monitor, label: "System" },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setTheme(opt.key)}
+                    aria-pressed={theme === opt.key}
+                    aria-label={opt.label}
+                    title={opt.label}
+                    className={cx(
+                      "flex h-8 w-8 items-center justify-center rounded-[6px] transition-colors",
+                      theme === opt.key ? "bg-brand text-white" : "text-ink-muted hover:bg-surface-container"
+                    )}
+                  >
+                    <opt.icon size={15} />
+                  </button>
+                ))}
+              </div>
             </CardBody>
           </Card>
         </section>

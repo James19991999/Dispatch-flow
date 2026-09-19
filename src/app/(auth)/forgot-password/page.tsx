@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="rounded-card border border-white/10 bg-[#111a2e] p-6 shadow-2xl">
-      <Link href="/login" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white/50 hover:text-white/80">
+      <Link href="/login" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-white/80">
         <ArrowLeft size={14} /> Back to sign in
       </Link>
 
@@ -42,18 +42,18 @@ export default function ForgotPasswordPage() {
             <CheckCircle2 size={24} />
           </div>
           <h1 className="text-lg font-bold text-white">Check your inbox</h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-slate-400">
             If an account exists for <span className="text-white/80">{email}</span>, a reset link is on its way.
           </p>
         </div>
       ) : (
         <>
           <h1 className="text-xl font-bold text-white">Reset your password</h1>
-          <p className="mt-1 text-sm text-white/50">We&apos;ll email you a secure link to choose a new one.</p>
+          <p className="mt-1 text-sm text-slate-400">We&apos;ll email you a secure link to choose a new one.</p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <Label className="text-white/60">Work Email</Label>
+              <Label className="text-slate-400">Work Email</Label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
                 <Input
