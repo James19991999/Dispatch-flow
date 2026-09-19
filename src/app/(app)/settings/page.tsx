@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Users, Truck, Car, ScrollText, Building2, MapPin, Sparkles, HelpCircle, Sun, Moon, Monitor } from "lucide-react";
+import { Users, Truck, Car, ScrollText, Building2, MapPin, Sparkles, HelpCircle, Sun, Moon, Monitor, CreditCard } from "lucide-react";
 import { TopBar } from "@/components/nav/TopBar";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -101,6 +101,7 @@ export default function SettingsPage() {
           <SettingsLink href="/settings/drivers" icon={Truck} label="Drivers" />
           <SettingsLink href="/settings/vehicles" icon={Car} label="Vehicles" />
           {canAdmin && <SettingsLink href="/settings/audit-log" icon={ScrollText} label="Audit Log" />}
+          <SettingsLink href="/settings/billing" icon={CreditCard} label="Billing" />
           <SettingsLink href="/help" icon={HelpCircle} label="Help" />
         </div>
 
@@ -205,11 +206,11 @@ export default function SettingsPage() {
             <CardBody className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold capitalize text-ink">{org.planTier}</p>
-                <p className="text-xs text-ink-muted">Seats are managed by your admin — no card required.</p>
+                <p className="text-xs text-ink-muted">Card or M-Pesa via IntaSend.</p>
               </div>
-              <a href="mailto:sales@dispatchflow.app?subject=Plan upgrade" className="text-xs font-bold text-brand">
-                Contact us to upgrade
-              </a>
+              <Link href="/settings/billing" className="text-xs font-bold text-brand">
+                Manage plan
+              </Link>
             </CardBody>
           </Card>
         </section>

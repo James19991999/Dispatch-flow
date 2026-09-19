@@ -102,5 +102,13 @@ service cloud.firestore {
       allow get: if true;
       allow list, write: if false;
     }
+
+    // ---- Top-level: intasendCheckouts (server-to-server only) ----
+    match /intasendCheckouts/{apiRef} {
+      // Short-lived lookup records the checkout route creates and the
+      // webhook route reads back to map a payment notification to an org +
+      // plan. Never read or written by any client — Admin SDK only.
+      allow read, write: if false;
+    }
   }
 }

@@ -25,6 +25,24 @@ export interface Organization {
   ownerId: string;
 }
 
+// Short-lived server-side lookup record created just before redirecting an
+// owner to IntaSend's hosted checkout page. IntaSend's checkout payload has
+// no free-form metadata field the way Stripe's does, so this is how the
+// webhook route maps an incoming apiRef back to an org + plan. Never
+// client-readable or -writable (see firestore.rules).
+export interface IntasendCheckout {
+  apiRef: string;
+  orgId: string;
+  orgName: string;
+  planId: string;
+  currency: "KES" | "USD";
+  amount: number;
+  status: "pending" | "completed" | "failed";
+  invoiceId?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Member {
   uid: string;
   orgId: string;

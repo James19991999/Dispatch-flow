@@ -34,13 +34,20 @@ Open http://localhost:3000 — you'll land on Sign In; use "Set up your organiza
 - **App**: push to GitHub, import into Vercel, set the same env vars there.
 - **Firestore rules/indexes**: `firebase deploy` (see above) — this is a separate pipeline from the Vercel deploy; pushing code does not push rules, and vice versa.
 
-## Access model (no billing)
-
-There is no self-serve signup-with-a-card anywhere in this app:
+## Access model
 
 - The first person to sign up creates the organization and becomes its **Owner**.
 - Everyone else joins by **invite** (Settings → Team → Invite Teammate), assigned one of: Admin, Dispatcher, Driver, Viewer. The owner role can't be reassigned or removed — there's no ownership-transfer flow, so that's a deliberate guard against orphaning an org.
-- Settings → Plan shows an informational plan-tier badge with a "Contact us" mailto link — never a card form. If usage limits are ever needed, gate them server-side rather than adding checkout UI.
+
+## Billing (IntaSend — card + M-Pesa, no Stripe)
+
+Stripe was explicitly excluded from this build; billing runs on **IntaSend** instead, chosen because Stripe has no M-Pesa support in any region and IntaSend gives one Checkout API for both card and M-Pesa STK Push. The app is fully usable without any billing configured — it just shows the free Starter plan.
+
+- **Settings → Billing** (`/settings/billing`) shows the plan catalog (`src/lib/billing/plans.ts`, single source of truth for both the UI and the amount charged server-side) and lets the org **Owner** (only) start a checkout for Growth or Enterprise, in USD (card) or KES (M-Pesa).
+- **`POST /api/billing/intasend-checkout`** is owner-gated, re-derives the price from the shared plan catalog (never trusts a client-supplied amount), creates a hosted IntaSend checkout session via a direct `fetch` wrapper (`src/lib/intasend/client.ts` — deliberately not the community `intasend-node` package, to keep the payment code path auditable in this repo), and persists a short-lived `intasendCheckouts/{apiRef}` lookup record before redirecting the payer. IntaSend's checkout payload has no metadata field the way Stripe's does, so this record is how the webhook maps a payment notification back to an org + plan. That collection is `read, write: if false` in `firestore.rules` — Admin SDK only, never client-reachable.
+- **`POST /api/webhooks/intasend`** is the security-critical piece. IntaSend's webhook model is **not** signature-based like Stripe's — there's no HMAC over the raw body. Instead you set a "Challenge" string once in the IntaSend dashboard, and every webhook delivery includes that same string in the plain JSON body for you to check. That's a structurally weaker scheme than an HMAC signature (it proves the sender knew the challenge string, not that the payload bytes weren't tampered with in transit), and the code says so in a comment rather than presenting it as equivalent to Stripe's verification. `crypto.timingSafeEqual` is used for the comparison to at least close the timing side-channel. On a verified `COMPLETE` event it transactionally marks the checkout completed and upgrades `organizations/{orgId}.planTier`, writes an audit log entry, and sends an in-app notification. It's idempotent on `checkout.status` so a redelivered webhook doesn't double-upgrade.
+- **One-time, not recurring.** IntaSend's Checkout API (what's wired in) is a single charge — an IntaSend-paid plan doesn't auto-renew the way a Stripe subscription would. IntaSend does have a separate Subscriptions API, deliberately not used here; wiring true recurring billing is a scoped follow-up, not something this build fakes as automatic.
+- **Unverified in this sandbox.** No live IntaSend account or credentials were available to build against — `isIntasendConfigured()` gates the checkout route so it returns a clean `503` rather than crashing when unconfigured (as it will in this sandbox), and the code follows IntaSend's documented API shape exactly, but a real charge → webhook → plan-upgrade round-trip hasn't been exercised end to end. Do that smoke test against your own IntaSend account (sandbox mode first — `INTASEND_LIVE=false` is the default) before relying on it.
 
 ## Security model
 
@@ -80,7 +87,7 @@ Everything below the dashed line is a **deliberate, documented** scope decision,
 ## Testing
 
 ```bash
-npm test        # 43 tests across 8 suites — RBAC rules, route optimizer, geo math, rate limiter, UI components
+npm test        # 48 tests across 9 suites — RBAC rules, route optimizer, geo math, rate limiter, billing plan catalog, UI components
 npm run lint
 npx tsc --noEmit
 npm run build
