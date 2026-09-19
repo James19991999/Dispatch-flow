@@ -1,0 +1,106 @@
+rules_version = '2';
+
+// DispatchFlow Firestore Security Rules — the real multi-tenant isolation
+// boundary. Custom auth claims (orgId/role) are used server-side to mint
+// session cookies quickly, but these rules never trust them: every check
+// re-derives membership and role by reading the live membership document,
+// so a stale or forged claim cannot grant access a current membership
+// record wouldn't.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function membership(orgId) {
+      return get(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+    }
+
+    function isMember(orgId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid)) &&
+        membership(orgId).data.status == 'active';
+    }
+
+    function role(orgId) {
+      return membership(orgId).data.role;
+    }
+
+    function hasRole(orgId, roles) {
+      return isMember(orgId) && role(orgId) in roles;
+    }
+
+    function isAtLeastDispatcher(orgId) {
+      return hasRole(orgId, ['owner', 'admin', 'dispatcher']);
+    }
+
+    function isAtLeastAdmin(orgId) {
+      return hasRole(orgId, ['owner', 'admin']);
+    }
+
+    // ---- Top-level: organizations ----
+    match /organizations/{orgId} {
+      allow get: if isMember(orgId);
+      // Org doc mutations go through the Admin SDK (API routes) only, so
+      // that role checks and audit logging always happen together.
+      allow create, update, delete: if false;
+
+      match /members/{uid} {
+        allow get: if isMember(orgId);
+        allow list: if isMember(orgId);
+        allow write: if false; // membership changes go through API routes
+      }
+
+      match /drivers/{driverId} {
+        allow get, list: if isMember(orgId);
+        allow write: if false; // API routes only (validation + audit log)
+      }
+
+      match /vehicles/{vehicleId} {
+        allow get, list: if isMember(orgId);
+        allow write: if false;
+      }
+
+      match /deliveries/{deliveryId} {
+        allow get, list: if isMember(orgId);
+        allow write: if false;
+      }
+
+      match /routes/{routeId} {
+        allow get, list: if isMember(orgId);
+        allow write: if false;
+      }
+
+      match /reviews/{reviewId} {
+        allow get, list: if isMember(orgId);
+        allow write: if false;
+      }
+
+      match /notifications/{notificationId} {
+        allow get, list: if isMember(orgId);
+        // Marking a notification read is a low-risk, high-frequency action
+        // scoped to the caller's own notifications — allowed directly from
+        // the client rather than round-tripping an API route.
+        allow update: if isMember(orgId) &&
+          (resource.data.targetUid == null || resource.data.targetUid == request.auth.uid) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow create, delete: if false;
+      }
+
+      match /auditLog/{entryId} {
+        allow get, list: if isAtLeastAdmin(orgId);
+        allow write: if false;
+      }
+    }
+
+    // ---- Top-level: invites (looked up by anonymous/new users) ----
+    match /invites/{token} {
+      // Reading an invite by its unguessable token is how a new user
+      // previews "you're invited to X" before signing in. Writes are
+      // API-route-only (they mint custom claims atomically with acceptance).
+      allow get: if true;
+      allow list, write: if false;
+    }
+  }
+}
