@@ -34,6 +34,20 @@ Open http://localhost:3000 — you'll land on Sign In; use "Set up your organiza
 - **App**: push to GitHub, import into Vercel, set the same env vars there.
 - **Firestore rules/indexes**: `firebase deploy` (see above) — this is a separate pipeline from the Vercel deploy; pushing code does not push rules, and vice versa.
 
+### Troubleshooting a 500 on Vercel
+
+A blank "500 Internal Server Error" page (as opposed to this app's own styled error screen) almost always means a serverless function crashed before React could render anything — and Vercel's dashboard, not this README, has the actual cause. **The fastest path to a fix:** open your Vercel project → the failing deployment → **Runtime Logs** (or **Functions** → click the failing function), reload the page that 500s, and read the stack trace that appears. That single line of log text pins the exact cause far faster than guessing.
+
+While you get that log, check these in order — they're the causes this exact codebase is most exposed to, ranked by how often they actually bite:
+
+1. **Missing or incomplete environment variables in the Vercel project.** All six `NEXT_PUBLIC_FIREBASE_*` vars, plus either `FIREBASE_SERVICE_ACCOUNT_KEY` or all three of `FIREBASE_PROJECT_ID`/`FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`, must be set on the Vercel project itself (Project → Settings → Environment Variables) — `.env.local` never leaves your machine. This is the single most common cause of a fresh deploy 500ing.
+2. **`FIREBASE_PRIVATE_KEY` pasted with real line breaks instead of literal `\n`.** Vercel's env var editor is a single-line text box; if you paste the multi-line PEM key as-is, it gets mangled and `cert()` throws the moment any route tries to use the Admin SDK. Paste it as one line with `\n` between segments (exactly as it appears if you `JSON.stringify` the key), or use `FIREBASE_SERVICE_ACCOUNT_KEY` with the full service-account JSON instead — one env var, no line-break editing at all.
+3. **The Firestore *database* itself was never created** in the Firebase Console. Creating a Firebase project does not create a Firestore database — that's a separate step (Firebase Console → Firestore Database → Create database) easy to miss, and every Admin SDK call fails until it's done.
+4. **Firestore rules/indexes never deployed** (`firebase deploy --only firestore:rules,firestore:indexes`) — this is a separate pipeline from `git push`/Vercel, described above.
+5. **Redeploy after adding/changing env vars.** Vercel doesn't hot-reload environment variables into an existing deployment — trigger a new deployment (Vercel → Deployments → ⋯ → Redeploy) after any env var change.
+
+This build already guards against the failure modes that are fixable in code rather than in Firebase/Vercel configuration: every API route catches Admin SDK errors and returns a clean JSON error instead of crashing (see the gap list below), and `next.config.mjs` marks `firebase-admin` as a server-external package, which is Firebase's own documented recommendation for avoiding Next.js App Router bundling issues on Vercel's serverless functions. If you've checked all of the above and still see a raw 500, the Runtime Logs stack trace is the next step — it names the exact file and line.
+
 ## Access model
 
 - The first person to sign up creates the organization and becomes its **Owner**.
