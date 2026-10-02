@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
   let decoded;
   try {
     decoded = await adminAuth().verifyIdToken(idToken, true);
-  } catch {
+  } catch (err) {
+    console.error("org/create token verification failed:", err);
     return NextResponse.json({ error: "Invalid session" }, { status: 401 });
   }
 

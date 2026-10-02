@@ -40,7 +40,8 @@ export async function POST(req: NextRequest) {
       path: "/",
     });
     return res;
-  } catch {
+  } catch (err) {
+    console.error("session exchange failed:", err);
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 }
