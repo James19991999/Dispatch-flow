@@ -1,12 +1,16 @@
 import { redirect } from "next/navigation";
-import { getCurrentSession } from "@/lib/auth/server";
+import { getSessionState } from "@/lib/auth/server";
 import { OrgProvider } from "@/components/providers/OrgProvider";
 import { Sidebar } from "@/components/nav/Sidebar";
 import { BottomNav } from "@/components/nav/BottomNav";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await getCurrentSession();
-  if (!session) redirect("/login?reason=session");
+  const state = await getSessionState();
+  // Signed in but never finished creating an organization: send them to
+  // finish onboarding rather than back to login.
+  if (state.status === "no_org") redirect("/onboarding?reason=no-org");
+  if (state.status !== "ok") redirect("/login?reason=session");
+  const session = state.session;
 
   return (
     <OrgProvider uid={session.uid} initialOrg={session.org} initialMember={session.member}>

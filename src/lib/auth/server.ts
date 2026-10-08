@@ -20,18 +20,23 @@ export interface CurrentSession {
  * components and Route Handlers. Firestore Security Rules are the boundary
  * for direct client SDK reads (see firestore.rules).
  */
-export async function getCurrentSession(): Promise<CurrentSession | null> {
+export type SessionState =
+  | { status: "ok"; session: CurrentSession }
+  | { status: "no_org" } // valid login, but onboarding never finished
+  | { status: "invalid" }; // no/expired/rejected cookie or missing member/org docs
+
+export async function getSessionState(): Promise<SessionState> {
   const cookieStore = cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) return null;
+  if (!sessionCookie) return { status: "invalid" };
 
   try {
     const decoded = await adminAuth().verifySessionCookie(sessionCookie, true);
     const uid = decoded.uid;
     const orgId = decoded.orgId as string | undefined;
     if (!orgId) {
-      console.error("getCurrentSession: session cookie has no orgId claim", { uid });
-      return null;
+      console.error("getSessionState: session cookie has no orgId claim (onboarding unfinished?)", { uid });
+      return { status: "no_org" };
     }
 
     const db = adminDb();
@@ -41,22 +46,30 @@ export async function getCurrentSession(): Promise<CurrentSession | null> {
     ]);
 
     if (!memberSnap.exists || !orgSnap.exists) {
-      console.error("getCurrentSession: member or org doc missing", { uid, orgId, member: memberSnap.exists, org: orgSnap.exists });
-      return null;
+      console.error("getSessionState: member or org doc missing", { uid, orgId, member: memberSnap.exists, org: orgSnap.exists });
+      return { status: "invalid" };
     }
     const member = memberSnap.data() as Member;
-    if (member.status !== "active") return null;
+    if (member.status !== "active") return { status: "invalid" };
 
     return {
-      uid,
-      email: decoded.email ?? member.email,
-      member,
-      org: orgSnap.data() as Organization,
+      status: "ok",
+      session: {
+        uid,
+        email: decoded.email ?? member.email,
+        member,
+        org: orgSnap.data() as Organization,
+      },
     };
   } catch (err) {
-    console.error("getCurrentSession failed:", err);
-    return null;
+    console.error("getSessionState failed:", err);
+    return { status: "invalid" };
   }
+}
+
+export async function getCurrentSession(): Promise<CurrentSession | null> {
+  const state = await getSessionState();
+  return state.status === "ok" ? state.session : null;
 }
 
 export async function requireSession(): Promise<CurrentSession> {

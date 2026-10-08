@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Building2, Mail, Lock, User, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -20,13 +20,15 @@ const TIMEZONES = [
   "Asia/Dubai",
 ];
 
-export default function OnboardingPage() {
+function OnboardingForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const noOrg = params.get("reason") === "no-org";
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [hasAccount, setHasAccount] = useState(false);
+  const [hasAccount, setHasAccount] = useState(noOrg);
 
   const [orgName, setOrgName] = useState("");
   const [depotName, setDepotName] = useState("");
@@ -95,6 +97,11 @@ export default function OnboardingPage() {
           <h1 className="text-xl font-bold text-white">
             {hasAccount ? "Sign in to continue" : "Create your admin account"}
           </h1>
+          {noOrg && (
+            <p className="text-sm text-slate-400">
+              Your account exists but setup wasn&apos;t finished. Sign in to create your organization.
+            </p>
+          )}
           {!hasAccount && (
             <div>
               <Label className="text-slate-400">Your Name</Label>
@@ -217,6 +224,14 @@ export default function OnboardingPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense>
+      <OnboardingForm />
+    </Suspense>
   );
 }
 
