@@ -25,7 +25,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (hasSession && (pathname === "/login" || pathname === "/")) {
+  // /login?reason=session means a server component rejected the cookie; let
+  // the login page clear it instead of bouncing back to /dashboard (a loop).
+  const sessionRejected = pathname === "/login" && req.nextUrl.searchParams.has("reason");
+
+  if (hasSession && !sessionRejected && (pathname === "/login" || pathname === "/")) {
     const url = req.nextUrl.clone();
     url.pathname = APP_ROOT_REDIRECT;
     url.search = "";

@@ -29,7 +29,10 @@ export async function getCurrentSession(): Promise<CurrentSession | null> {
     const decoded = await adminAuth().verifySessionCookie(sessionCookie, true);
     const uid = decoded.uid;
     const orgId = decoded.orgId as string | undefined;
-    if (!orgId) return null;
+    if (!orgId) {
+      console.error("getCurrentSession: session cookie has no orgId claim", { uid });
+      return null;
+    }
 
     const db = adminDb();
     const [memberSnap, orgSnap] = await Promise.all([
@@ -37,7 +40,10 @@ export async function getCurrentSession(): Promise<CurrentSession | null> {
       db.doc(`organizations/${orgId}`).get(),
     ]);
 
-    if (!memberSnap.exists || !orgSnap.exists) return null;
+    if (!memberSnap.exists || !orgSnap.exists) {
+      console.error("getCurrentSession: member or org doc missing", { uid, orgId, member: memberSnap.exists, org: orgSnap.exists });
+      return null;
+    }
     const member = memberSnap.data() as Member;
     if (member.status !== "active") return null;
 
@@ -47,7 +53,8 @@ export async function getCurrentSession(): Promise<CurrentSession | null> {
       member,
       org: orgSnap.data() as Organization,
     };
-  } catch {
+  } catch (err) {
+    console.error("getCurrentSession failed:", err);
     return null;
   }
 }

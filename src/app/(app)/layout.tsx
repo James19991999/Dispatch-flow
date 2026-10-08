@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/login?reason=session");
 
   return (
     <OrgProvider uid={session.uid} initialOrg={session.org} initialMember={session.member}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Fingerprint, Lock, Mail } from "lucide-react";
@@ -16,6 +16,14 @@ function LoginForm() {
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // A server component rejected our session cookie: clear it so the user can
+  // sign in again instead of looping between /login and /dashboard.
+  useEffect(() => {
+    if (params.get("reason")) {
+      fetch("/api/auth/session", { method: "DELETE" }).catch(() => {});
+    }
+  }, [params]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
