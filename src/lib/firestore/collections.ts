@@ -11,12 +11,19 @@ import type {
   Member,
 } from "@/types/models";
 
-function converter<T extends DocumentData>(): FirestoreDataConverter<T> {
-  return {
-    toFirestore: (data) => data as DocumentData,
-    fromFirestore: (snap) => snap.data() as T,
-  };
+// One shared converter instance. Firestore's queryEqual() treats queries with
+// different converter objects as different, so building a fresh converter per
+// call made every query "new" and defeated useLiveCollection's de-duplication.
+const IDENTITY_CONVERTER: FirestoreDataConverter<DocumentData> = {
+  toFirestore: (data) => data as DocumentData,
+  fromFirestore: (snap) => snap.data() as DocumentData,
+};
+
+export function identityConverter<T extends DocumentData>(): FirestoreDataConverter<T> {
+  return IDENTITY_CONVERTER as FirestoreDataConverter<T>;
 }
+
+const converter = identityConverter;
 
 function orgCollection<T extends DocumentData>(orgId: string, name: string): CollectionReference<T> {
   return collection(clientDb(), `organizations/${orgId}/${name}`).withConverter(converter<T>());
