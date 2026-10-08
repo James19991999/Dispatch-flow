@@ -30,7 +30,15 @@ export function clientAuth(): Auth {
 }
 
 export function clientDb(): Firestore {
-  if (!_db) _db = getFirestore(getFirebaseApp());
+  if (!_db) {
+    // Firestore only attaches the signed-in user's token if Firebase Auth has
+    // been initialized for the app BEFORE Firestore starts talking to the
+    // server. On a fresh page load nothing else touches Auth, so without this
+    // every query went out unauthenticated and the security rules answered
+    // "permission-denied" even though the user was logged in.
+    clientAuth();
+    _db = getFirestore(getFirebaseApp());
+  }
   return _db;
 }
 

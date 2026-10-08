@@ -50,6 +50,11 @@ function LoginForm() {
     <div className="rounded-card border border-white/10 bg-[#111a2e] p-6 shadow-2xl">
       <h1 className="text-xl font-bold text-white">Sign In to Dispatch</h1>
       <p className="mt-1 text-sm text-slate-400">Central Hub · authenticate to view live fleet operations.</p>
+      {params.get("reason") && (
+        <p role="status" className="mt-3 rounded-control bg-white/5 px-3 py-2 text-xs text-slate-300">
+          Your session ended or couldn&apos;t be verified. Please sign in again.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
