@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { onSnapshot, Query, FirestoreError } from "firebase/firestore";
+import { reportQueryError } from "./queryErrors";
 
 interface State<T> {
   data: T[];
@@ -30,6 +31,7 @@ export function useLiveCollection<T>(query: Query<T> | null): State<T> {
         setState({ data: snap.docs.map((d) => d.data()), loading: false, error: null });
       },
       (err: FirestoreError) => {
+        reportQueryError(`${err.code}: ${err.message}`);
         setState({ data: [], loading: false, error: err.message });
       }
     );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Users, Truck, Car, ScrollText, Building2, MapPin, Sparkles, HelpCircle, Sun, Moon, Monitor, CreditCard } from "lucide-react";
 import { TopBar } from "@/components/nav/TopBar";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -17,6 +18,7 @@ import { cx } from "@/lib/utils";
 const TIMEZONES = ["Africa/Nairobi", "Africa/Lagos", "Africa/Johannesburg", "Africa/Cairo", "Europe/London", "America/New_York", "America/Los_Angeles", "Asia/Dubai"];
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { org, member } = useOrg();
   const { push } = useToast();
   const { theme, setTheme } = useTheme();
@@ -71,6 +73,7 @@ export default function SettingsPage() {
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Could not seed demo data");
       push("success", "Demo fleet data added — explore the dashboard!");
+      router.refresh();
     } catch (err) {
       push("error", err instanceof Error ? err.message : "Something went wrong");
     } finally {

@@ -13,6 +13,7 @@ import { Input, Label } from "@/components/ui/Field";
 import { SignaturePad } from "@/components/deliveries/SignaturePad";
 import { useOrg } from "@/components/providers/OrgProvider";
 import { clientDb } from "@/lib/firebase/client";
+import { reportQueryError } from "@/lib/firestore/queryErrors";
 import { useToast } from "@/components/ui/Toast";
 import { formatTime, cx } from "@/lib/utils";
 import { canManageFleet } from "@/lib/auth/roles";
@@ -32,7 +33,14 @@ export default function DeliveryDetailPage() {
 
   useEffect(() => {
     const ref = doc(clientDb(), `organizations/${org.id}/deliveries/${id}`);
-    return onSnapshot(ref, (snap) => setDelivery(snap.exists() ? (snap.data() as Delivery) : null));
+    return onSnapshot(
+      ref,
+      (snap) => setDelivery(snap.exists() ? (snap.data() as Delivery) : null),
+      (err) => {
+        reportQueryError(`${err.code}: ${err.message}`);
+        setDelivery(null);
+      }
+    );
   }, [org.id, id]);
 
   async function updateStatus(status: DeliveryStatus, extra?: Record<string, unknown>) {

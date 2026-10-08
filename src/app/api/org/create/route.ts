@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { rateLimit, clientIp } from "@/lib/rateLimit";
+import { defaultDepotFor } from "@/lib/depotDefaults";
 import type { Member, Organization } from "@/types/models";
 
 const schema = z.object({
@@ -58,6 +59,8 @@ export async function POST(req: NextRequest) {
       depotAddress,
       timezone,
       units: "mi",
+      depotLat: defaultDepotFor(timezone)?.lat ?? null,
+      depotLng: defaultDepotFor(timezone)?.lng ?? null,
       logoUrl: null,
       planTier: "starter",
       createdAt: now,

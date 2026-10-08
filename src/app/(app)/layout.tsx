@@ -3,6 +3,7 @@ import { getSessionState } from "@/lib/auth/server";
 import { OrgProvider } from "@/components/providers/OrgProvider";
 import { Sidebar } from "@/components/nav/Sidebar";
 import { BottomNav } from "@/components/nav/BottomNav";
+import { QueryErrorBanner } from "@/components/nav/QueryErrorBanner";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const state = await getSessionState();
@@ -16,7 +17,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <OrgProvider uid={session.uid} initialOrg={session.org} initialMember={session.member}>
       <div className="min-h-screen bg-canvas sm:pl-64">
         <Sidebar />
-        <main className="pb-20 sm:pb-6">{children}</main>
+        <main className="pb-20 sm:pb-6">
+          <QueryErrorBanner />
+          {children}
+        </main>
         <BottomNav />
       </div>
     </OrgProvider>

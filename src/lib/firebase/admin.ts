@@ -72,7 +72,19 @@ export function adminAuth(): Auth {
 }
 
 export function adminDb(): Firestore {
-  if (!_adminDb) _adminDb = getFirestore(buildAdminApp());
+  if (!_adminDb) {
+    const db = getFirestore(buildAdminApp());
+    // Many API routes build documents from optional form fields (weightKg,
+    // email, a journey note...). Without this, Firestore throws on any
+    // `undefined` value and the route returns a 500. settings() may only be
+    // called once per instance, so tolerate a repeat call (hot reload).
+    try {
+      db.settings({ ignoreUndefinedProperties: true });
+    } catch {
+      /* already configured */
+    }
+    _adminDb = db;
+  }
   return _adminDb;
 }
 

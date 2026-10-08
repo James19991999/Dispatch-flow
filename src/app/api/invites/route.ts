@@ -6,6 +6,8 @@ import { requireApiSession, apiErrorResponse } from "@/lib/auth/api";
 import { writeAuditLog } from "@/lib/firestore/audit";
 import type { Invite } from "@/types/models";
 
+export const dynamic = "force-dynamic";
+
 const schema = z.object({
   email: z.string().email(),
   role: z.enum(["admin", "dispatcher", "driver", "viewer"]),

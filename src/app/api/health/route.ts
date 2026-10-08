@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminAuth, readServiceAccountJson } from "@/lib/firebase/admin";
+import { adminAuth, adminDb, readServiceAccountJson } from "@/lib/firebase/admin";
 
 // TEMPORARY diagnostic route — delete after the Firebase Admin setup is
 // confirmed working. Reports only booleans, counts and Google's own error
@@ -68,5 +68,15 @@ export async function GET() {
     adminCall = { ok: false, code: e.code, message: (e.message ?? String(err)).slice(0, 400) };
   }
 
-  return NextResponse.json({ checks, jsonDetails, splitKey: splitKey ? describeKey(splitKey) : null, adminCall });
+  // Does the Firestore database exist and is the Admin SDK allowed to use it?
+  let firestoreCall: { ok: boolean; code?: string | number; message?: string };
+  try {
+    await adminDb().collection("organizations").limit(1).get();
+    firestoreCall = { ok: true };
+  } catch (err) {
+    const e = err as { code?: string | number; message?: string };
+    firestoreCall = { ok: false, code: e.code, message: (e.message ?? String(err)).slice(0, 400) };
+  }
+
+  return NextResponse.json({ checks, jsonDetails, splitKey: splitKey ? describeKey(splitKey) : null, adminCall, firestoreCall });
 }

@@ -5,6 +5,8 @@ import { requireApiSession, apiErrorResponse } from "@/lib/auth/api";
 import { writeAuditLog } from "@/lib/firestore/audit";
 import type { Delivery } from "@/types/models";
 
+export const dynamic = "force-dynamic";
+
 function toCsvRow(fields: (string | number)[]): string {
   return fields
     .map((f) => {

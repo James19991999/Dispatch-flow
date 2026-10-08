@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { requireApiSession, apiErrorResponse } from "@/lib/auth/api";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await requireApiSession("viewer");

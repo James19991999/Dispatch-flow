@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { clientDb } from "@/lib/firebase/client";
+import { reportQueryError } from "@/lib/firestore/queryErrors";
 import type { Member, Organization } from "@/types/models";
 
 interface OrgContextValue {
@@ -40,9 +41,13 @@ export function OrgProvider({
 
   useEffect(() => {
     const ref = doc(clientDb(), `organizations/${initialOrg.id}/members/${uid}`);
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setMember(snap.data() as Member);
-    });
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        if (snap.exists()) setMember(snap.data() as Member);
+      },
+      (err) => reportQueryError(`${err.code}: ${err.message}`)
+    );
     return unsub;
   }, [initialOrg.id, uid]);
 
