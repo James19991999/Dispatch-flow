@@ -5,6 +5,7 @@ import {
   MapPinned,
   Route as RouteIcon,
   BarChart3,
+  Settings,
 } from "lucide-react";
 
 export interface NavItem {
@@ -20,3 +21,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/routes", label: "Routes", icon: RouteIcon },
   { href: "/reports", label: "Analytics", icon: BarChart3 },
 ];
+
+// Desktop shows Settings in the sidebar footer; on mobile there is no sidebar,
+// so it has to be a bottom-nav tab or Team, Drivers, Vehicles, Billing and
+// Sign out are unreachable.
+export const SETTINGS_ITEM: NavItem = { href: "/settings", label: "Settings", icon: Settings };

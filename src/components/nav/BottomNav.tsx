@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cx } from "@/lib/utils";
-import { NAV_ITEMS } from "./nav-items";
+import { NAV_ITEMS, SETTINGS_ITEM } from "./nav-items";
 
 export function BottomNav() {
   const pathname = usePathname();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-outline-variant bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden">
       <ul className="flex items-stretch justify-between px-1">
-        {NAV_ITEMS.map((item) => {
+        {[...NAV_ITEMS, SETTINGS_ITEM].map((item) => {
           const active = pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
