@@ -1,4 +1,4 @@
-// Lightweight, dependency-free "geocoding" stand-in.
+// Fallback "geocoding" used only when a real lookup (see geocode.ts) fails.
 //
 // No geocoding provider (Mapbox, OpenCage, Google Geocoding) is wired into
 // this build — see README "Known gaps" for why (a provider/key choice is a
@@ -10,6 +10,8 @@
 // maps fully functional for demoing and testing the product, but it is not
 // real geocoding — swap `offsetFromDepot` for a real provider call before
 // using actual customer addresses in production.
+
+export type LatLng = { lat: number; lng: number };
 
 function hashString(input: string): number {
   let hash = 0;

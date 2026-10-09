@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { requireApiSession, apiErrorResponse } from "@/lib/auth/api";
 import { writeAuditLog, notifyOrg } from "@/lib/firestore/audit";
 import { offsetFromDepot } from "@/lib/geo";
+import { geocodeAddress } from "@/lib/geocode";
 import type { Delivery } from "@/types/models";
 
 const schema = z.object({
@@ -35,10 +36,12 @@ export async function POST(req: NextRequest) {
     const now = new Date().toISOString();
 
     const { depotLat, depotLng } = session.org;
+    const depot =
+      typeof depotLat === "number" && typeof depotLng === "number" ? { lat: depotLat, lng: depotLng } : null;
+    // Real lookup first; fall back to a depot offset so the delivery still maps.
     const coords =
-      typeof depotLat === "number" && typeof depotLng === "number"
-        ? offsetFromDepot(depotLat, depotLng, parsed.data.destinationAddress)
-        : null;
+      (await geocodeAddress(parsed.data.destinationAddress, depot)) ??
+      (depot ? offsetFromDepot(depot.lat, depot.lng, parsed.data.destinationAddress) : null);
 
     const delivery: Delivery = {
       id: ref.id,

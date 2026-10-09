@@ -4,21 +4,12 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Building2, Mail, Lock, User, MapPin } from "lucide-react";
+import { TIMEZONES } from "@/lib/timezones";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldError } from "@/components/ui/Field";
 import { signUpWithPassword, signInWithPassword, establishSessionCookie } from "@/lib/auth/client";
 import { clientAuth } from "@/lib/firebase/client";
 
-const TIMEZONES = [
-  "Africa/Nairobi",
-  "Africa/Lagos",
-  "Africa/Johannesburg",
-  "Africa/Cairo",
-  "Europe/London",
-  "America/New_York",
-  "America/Los_Angeles",
-  "Asia/Dubai",
-];
 
 function OnboardingForm() {
   const router = useRouter();

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Users, Truck, Car, ScrollText, Building2, MapPin, Sparkles, HelpCircle, Sun, Moon, Monitor, CreditCard } from "lucide-react";
 import { TopBar } from "@/components/nav/TopBar";
 import { Card, CardBody } from "@/components/ui/Card";
+import { TIMEZONES } from "@/lib/timezones";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select, FieldError } from "@/components/ui/Field";
 import { useOrg } from "@/components/providers/OrgProvider";
@@ -15,7 +16,6 @@ import { canManageTeam } from "@/lib/auth/roles";
 import { ROLE_LABELS } from "@/lib/auth/roles";
 import { cx } from "@/lib/utils";
 
-const TIMEZONES = ["Africa/Nairobi", "Africa/Lagos", "Africa/Johannesburg", "Africa/Cairo", "Europe/London", "America/New_York", "America/Los_Angeles", "Asia/Dubai"];
 
 export default function SettingsPage() {
   const router = useRouter();
