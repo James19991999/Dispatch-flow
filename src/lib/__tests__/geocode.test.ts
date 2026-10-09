@@ -10,20 +10,20 @@ afterEach(() => {
 describe("geocodeAddress", () => {
   it("uses Nominatim without a Mapbox token", async () => {
     const f = jest.fn().mockResolvedValue({ ok: true, json: async () => [{ lat: "-1.30", lon: "36.80" }] });
-    (global as any).fetch = f;
+    global.fetch = f as unknown as typeof fetch;
     const r = await geocodeAddress("Kenyatta Avenue, Nairobi", { lat: -1.29, lng: 36.82 });
     expect(r).toEqual({ lat: -1.3, lng: 36.8 });
     expect(String(f.mock.calls[0][0])).toContain("nominatim.openstreetmap.org");
   });
   it("uses Mapbox when a token is set", async () => {
     process.env.MAPBOX_ACCESS_TOKEN = "t";
-    (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ features: [{ center: [3.4, 6.5] }] }) });
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ features: [{ center: [3.4, 6.5] }] }) }) as unknown as typeof fetch;
     expect(await geocodeAddress("Allen Avenue, Lagos")).toEqual({ lat: 6.5, lng: 3.4 });
   });
   it("returns null on failure, no match or short input", async () => {
-    (global as any).fetch = jest.fn().mockRejectedValue(new Error("down"));
+    global.fetch = jest.fn().mockRejectedValue(new Error("down")) as unknown as typeof fetch;
     expect(await geocodeAddress("somewhere")).toBeNull();
-    (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => [] });
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => [] }) as unknown as typeof fetch;
     expect(await geocodeAddress("nowhere at all")).toBeNull();
     expect(await geocodeAddress("ab")).toBeNull();
   });
